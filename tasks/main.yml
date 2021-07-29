@@ -1,0 +1,21 @@
+---
+- name: Start docker vmselect container
+  docker_compose:
+    state: present
+    project_name: vmselect
+    definition:
+      version: '2'
+      services:
+        alertmanager:
+          image: "{{ vmselect_docker_image }}"
+          container_name: "{{ vmselect_container_name }}"
+          command: "{{ vmselect_command }}"
+          ports:
+            - "127.0.0.1:8481:8481"
+          hostname: "{{ vmselect_container_name }}"
+          restart: always
+          labels: "{{ vmselect_docker_labels }}"
+      networks:
+        default:
+          external:
+            name: "{{ vmselect_docker_network_name }}"
