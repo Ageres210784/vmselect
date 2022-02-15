@@ -4,7 +4,7 @@ vmselect_container_name: vmselect
 vmselect_docker_image: "victoriametrics/vmselect:v1.63.0-cluster"
 vmselect_docker_labels:
   - vmselect
-vmselect_address: "127.0.0.1:"
+vmselect_address: "127.0.0.1"
 vmselect_command:
   - '--storageNode={{ ansible_host }}:8401'
   # - '--dedup.minScrapeInterval=1ms'

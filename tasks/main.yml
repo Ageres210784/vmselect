@@ -11,7 +11,7 @@
           container_name: "{{ vmselect_container_name }}"
           command: "{{ vmselect_command }}"
           ports:
-            - "{{ vmselect_address }}8481:8481"
+            - "{{ vmselect_address }}:8481:8481"
           hostname: "{{ vmselect_container_name }}"
           restart: always
           labels: "{{ vmselect_docker_labels }}"
