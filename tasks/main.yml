@@ -6,7 +6,7 @@
     definition:
       version: '2'
       services:
-        alertmanager:
+        vmselect:
           image: "{{ vmselect_docker_image }}"
           container_name: "{{ vmselect_container_name }}"
           command: "{{ vmselect_command }}"
@@ -19,3 +19,45 @@
         default:
           external:
             name: "{{ vmselect_docker_network_name }}"
+  when: not vmselect_swarm_cluster or vm_swarm_manager is undefined
+
+- name: Deploy vmselect to docker swarm
+  block:
+    - name: Ensure pip installation
+      package:
+        name: "python3-pip"
+        state: present
+
+    - name: Install newer version of pip itself
+      pip:
+        name: "pip"
+        state: latest
+        executable: pip3
+
+    - name: Install Docker Compose from pip
+      pip:
+        name: "jsondiff"
+        state: present
+        executable: pip3
+
+    - name: Deploy docker vmselect container in swarm
+      community.docker.docker_stack:
+        state: present
+        name: "{{ vmselect_stack_name }}"
+        compose:
+          - version: '3.5'
+            services:
+              vmselect:
+                image: "{{ vmselect_docker_image }}"
+                command: "{{ vmselect_command }}"
+                hostname: "{{ vmselect_container_name }}"
+                labels: "{{ vmselect_docker_labels }}"
+                deploy: "{{ vmselect_swarm_deploy }}"
+            networks:
+              default:
+                external:
+                  name: "{{ vmselect_docker_network_name }}"
+  delegate_to: "{{ vm_swarm_manager }}"
+  when:
+    - vmselect_swarm_cluster
+    - vm_swarm_manager is defined
