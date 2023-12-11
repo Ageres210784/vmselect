@@ -9,3 +9,27 @@ vmselect_command:
   - '--storageNode={{ ansible_host }}:8401'
   # - '--dedup.minScrapeInterval=1ms'
   # - '--replicationFactor=2' # see more https://github.com/VictoriaMetrics/VictoriaMetrics/tree/cluster#replication-and-data-safety
+
+vmselect_stack_name: victoriametrics
+vmselect_swarm_cluster: false
+vmselect_swarm_deploy:
+  mode: replicated
+  replicas: 1
+  placement:
+    constraints:
+      - node.labels.victoriametrics == true
+
+# example:
+# mode: replicated
+# replicas: 2
+# restart_policy:
+#   condition: any
+#   delay: 10s
+# update_config:
+#   parallelism: 1
+#   delay: 30s
+#   failure_action: rollback
+# placement:
+#   max_replicas_per_node: 1
+#   constraints:
+#     - node.labels.victoriametrics == true
