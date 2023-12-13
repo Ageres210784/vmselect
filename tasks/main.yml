@@ -57,6 +57,7 @@
               default:
                 external:
                   name: "{{ vmselect_docker_network_name }}"
+      run_once: True
   delegate_to: "{{ vm_swarm_manager }}"
   when:
     - vmselect_swarm_cluster
