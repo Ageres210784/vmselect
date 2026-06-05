@@ -5,6 +5,9 @@ vmselect_docker_image: "victoriametrics/vmselect:v1.77.2-cluster"
 vmselect_docker_labels:
   - vmselect
 vmselect_address: "127.0.0.1"
+vmselect_port: '8481'
+vmselect_ports:
+  - "{{ '' if vmselect_swarm_cluster | bool else vmselect_address + ':' }}{{ vmselect_port }}:8481"
 vmselect_command:
   - '--storageNode={{ ansible_host }}:8401'
   # - '--dedup.minScrapeInterval=1ms'
