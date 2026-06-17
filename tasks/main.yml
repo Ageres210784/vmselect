@@ -9,8 +9,7 @@
           image: "{{ vmselect_docker_image }}"
           container_name: "{{ vmselect_container_name }}"
           command: "{{ vmselect_command }}"
-          ports:
-            - "{{ vmselect_address }}:8481:8481"
+          ports: "{{ vmselect_ports }}"
           hostname: "{{ vmselect_container_name }}"
           restart: always
           labels: "{{ vmselect_docker_labels }}"
@@ -23,35 +22,35 @@
 - name: Deploy vmselect to docker swarm
   block:
     - name: Ensure pip installation
-      package:
+      ansible.builtin.package:
         name: "python3-pip"
         state: present
 
     - name: Install newer version of pip itself
-      pip:
+      ansible.builtin.pip:
         name: "pip"
         state: latest
         executable: pip3
       when:
-        - ansible_distribution == "ubuntu"
-        - ansible_distribution_major_version != 24
+        - ansible_facts['distribution'] | lower == "ubuntu"
+        - ansible_facts['distribution_major_version'] | int != 24
 
     - name: Install jsondiff from pip
-      pip:
+      ansible.builtin.pip:
         name: "jsondiff"
         state: present
         executable: pip3
       when:
-        - ansible_distribution == "ubuntu"
-        - ansible_distribution_major_version != 24
+        - ansible_facts['distribution'] | lower == "ubuntu"
+        - ansible_facts['distribution_major_version'] | int != 24
 
     - name: Ensure jsondiff
-      package:
+      ansible.builtin.package:
         name: "python3-jsondiff"
         state: present
       when:
-        - ansible_distribution == "ubuntu"
-        - ansible_distribution_major_version == 24
+        - ansible_facts['distribution'] | lower == "ubuntu"
+        - ansible_facts['distribution_major_version'] | int == 24
 
     - name: Deploy docker vmselect container in swarm
       community.docker.docker_stack:
@@ -59,20 +58,20 @@
         name: "{{ vmselect_stack_name }}"
         with_registry_auth: yes
         compose:
-          - version: '3.5'
-            services:
+          - services:
               vmselect:
                 image: "{{ vmselect_docker_image }}"
                 command: "{{ vmselect_command }}"
                 hostname: "{{ vmselect_container_name }}"
                 labels: "{{ vmselect_docker_labels }}"
+                ports: "{{ vmselect_ports }}"
                 deploy: "{{ vmselect_swarm_deploy }}"
             networks:
               default:
                 external:
                   name: "{{ vmselect_docker_network_name }}"
       run_once: True
-  delegate_to: "{{ vm_swarm_manager }}"
+  delegate_to: "{{ vm_swarm_manager | default(omit) }}"
   when:
     - vmselect_swarm_cluster
     - vm_swarm_manager is defined
