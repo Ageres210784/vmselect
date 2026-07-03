@@ -12,6 +12,8 @@ vmselect_command:
   - '--storageNode={{ ansible_host }}:8401'
   # - '--dedup.minScrapeInterval=1ms'
   # - '--replicationFactor=2' # see more https://github.com/VictoriaMetrics/VictoriaMetrics/tree/cluster#replication-and-data-safety
+vmselect_uid: "10000"
+vmselect_gid: "{{ vmselect_uid }}"
 
 vmselect_stack_name: victoriametrics
 vmselect_swarm_cluster: false
