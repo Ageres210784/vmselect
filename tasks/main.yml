@@ -13,6 +13,7 @@
           hostname: "{{ vmselect_container_name }}"
           restart: always
           labels: "{{ vmselect_docker_labels }}"
+          user: "{{ vmselect_uid }}:{{ vmselect_gid }}"
       networks:
         default:
           external: true
@@ -20,6 +21,10 @@
   when: not vmselect_swarm_cluster or vm_swarm_manager is undefined
 
 - name: Deploy vmselect to docker swarm
+  delegate_to: "{{ vm_swarm_manager | default(omit) }}"
+  when:
+    - vmselect_swarm_cluster
+    - vm_swarm_manager is defined
   block:
     - name: Ensure pip installation
       ansible.builtin.package:
@@ -56,7 +61,7 @@
       community.docker.docker_stack:
         state: present
         name: "{{ vmselect_stack_name }}"
-        with_registry_auth: yes
+        with_registry_auth: true
         compose:
           - services:
               vmselect:
@@ -66,12 +71,9 @@
                 labels: "{{ vmselect_docker_labels }}"
                 ports: "{{ vmselect_ports }}"
                 deploy: "{{ vmselect_swarm_deploy }}"
+                user: "{{ vmselect_uid }}:{{ vmselect_gid }}"
             networks:
               default:
                 external:
                   name: "{{ vmselect_docker_network_name }}"
-      run_once: True
-  delegate_to: "{{ vm_swarm_manager | default(omit) }}"
-  when:
-    - vmselect_swarm_cluster
-    - vm_swarm_manager is defined
+      run_once: true
